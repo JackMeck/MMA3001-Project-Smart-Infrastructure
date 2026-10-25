@@ -26,7 +26,7 @@ def plot_test_results(test: pd.DataFrame, y_te: pd.Series, preds: dict, path: st
     fig, ax = plt.subplots(1, 2, figsize=(14, 4))
     test["MAE"].plot.bar(ax=ax[0], color=COLOURS[:len(test)], rot=15)
     ax[0].set(title="Final test MAE (people)", ylabel="MAE")
-    n = days * 96
+    n = days * 96  # 96 fifteen-minute intervals per day
     ax[1].plot(y_te.index[:n], y_te.values[:n], "k", lw=1, label="observed")
     for (name, p), c in zip(preds.items(), COLOURS):
         ax[1].plot(y_te.index[:n], p[:n], color=c, lw=1, label=name)

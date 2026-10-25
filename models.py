@@ -41,6 +41,7 @@ class ScheduleBaseline(BaseEstimator, RegressorMixin):
     @staticmethod
     def _key(X: pd.DataFrame) -> np.ndarray:
         """Build the slot key for each row from the ``weekend`` and ``hour`` columns."""
+        # round to whole hours so each slot (e.g. weekday 09:00) pools four 15-min intervals per day
         return np.array([f"{int(w)}_{int(round(h))}" for w, h in zip(X["weekend"], X["hour"])])
 
     def fit(self, X: pd.DataFrame, y) -> "ScheduleBaseline":
@@ -53,6 +54,7 @@ class ScheduleBaseline(BaseEstimator, RegressorMixin):
         Returns:
             ``self``.
         """
+        # plain dict lookup table: mean headcount per slot, learned from training data only
         self.table_ = pd.Series(np.asarray(y)).groupby(self._key(X)).mean().to_dict()
         self.mean_ = float(np.mean(y))
         return self
@@ -71,6 +73,8 @@ class ScheduleBaseline(BaseEstimator, RegressorMixin):
 
 def _preprocess(cols: Sequence[str]) -> list:
     """Shared preprocessing steps: select ``cols``, median-impute, standardise."""
+    # order matters: select -> fill blanks -> scale. The imputer and scaler are fitted inside each
+    # pipeline fit, so validation/test statistics never leak into training.
     return [ColumnTransformer([("c", "passthrough", list(cols))]),
             SimpleImputer(strategy="median"), StandardScaler()]
 
@@ -100,6 +104,8 @@ def svr_on(cols: Sequence[str], C: float, epsilon: float) -> ModelFactory:
     Returns:
         Zero-argument callable producing a fresh pipeline.
     """
+    # scaling is essential here: the RBF kernel uses distances, so an unscaled CO2 (hundreds of ppm)
+    # would swamp temperature and the 0/1 weekend flag
     return lambda: make_pipeline(*_preprocess(cols), SVR(C=C, epsilon=epsilon))
 
 

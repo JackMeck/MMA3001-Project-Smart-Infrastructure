@@ -67,13 +67,14 @@ def parse_env_records(jsondata: Iterable[str]) -> pd.DataFrame:
         variable in :data:`occupancy.config.ENV_VARS`. Entries with an
         ``errorCode`` or no ``value`` are skipped. Empty if nothing is valid.
     """
-    rows: dict = {}
+    rows: dict = {}  # timestamp -> {variable: value}, so variables recorded together share one row
     for js in jsondata:
         for rec in json.loads(js):
             name = config.ENV_VARS.get(rec.get("variable", {}).get("name"))
             if name is None:
-                continue
+                continue  # variable we do not model
             for v in rec.get("values", []):
+                # an errorCode means the sensor flagged the reading as invalid, so it is not a measurement
                 if "value" in v and "errorCode" not in v:
                     rows.setdefault(v["time"], {})[name] = v["value"]
     if not rows:
@@ -98,10 +99,13 @@ def remove_placeholders(env: pd.DataFrame, share: float = config.PLACEHOLDER_SHA
         of dropped combinations.
     """
     key = list(key)
+    # a real sensor never repeats the same 3-variable reading this often; a stuck sensor does
     counts = env[key].value_counts()
     placeholder = counts[counts / len(env) >= share].index
     if len(placeholder) == 0:
         return env, []
+    # match whole (co2, temperature, humidity) combinations, not single columns, to avoid
+    # discarding genuine readings that merely share one value
     keep = ~env.set_index(key).index.isin(placeholder)
     return env[keep], list(placeholder)
 
@@ -123,9 +127,12 @@ def to_grid(env: pd.DataFrame, start: str, end: str, freq: str = config.GRID,
         Table on a continuous grid; longer gaps remain NaN.
     """
     env = env.loc[start:end].copy()
+    # ceil (round UP) so a reading is only ever used at or after the time it was taken;
+    # rounding to the nearest point would let a prediction see up to 7 min of the future
     env.index = env.index.ceil(freq)
     env = env.groupby(level=0).mean()
     grid = pd.date_range(env.index.min(), env.index.max(), freq=freq)
+    # reindex exposes missing intervals as NaN; the limit stops a long outage being papered over
     return env.reindex(grid).ffill(limit=max_ffill)
 
 
@@ -145,14 +152,16 @@ def load_environment(env_csv: str, sensor_id: str = config.ENV_SENSOR_ID,
         DataFrame on a 15-minute grid with columns ``co2, temperature, humidity,
         voc, pm2_5`` (units: ppm, deg C, %, sensor units, sensor units).
     """
+    # only two columns are needed; skipping the rest keeps memory low
     raw = pd.read_csv(env_csv, usecols=["sensorid", "jsondata"])
     raw = raw[raw["sensorid"].astype(str) == sensor_id]
     env = parse_env_records(raw["jsondata"])
+    # file times are Unix seconds in UTC; convert to local time so hour/weekend features are meaningful
     env.index = pd.to_datetime(pd.to_numeric(env.index), unit="s", utc=True).tz_convert(tz).tz_localize(None)
     env = env.dropna(subset=["co2"])
     n_valid = len(env)
     env, placeholders = remove_placeholders(env)
-    env = env[~env.index.duplicated(keep="last")].sort_index()
+    env = env[~env.index.duplicated(keep="last")].sort_index()  # duplicate stamps: trust the latest
     if verbose:
         print(len(raw), "raw rows |", n_valid, "rows after error-code filter")
         print("placeholder readings dropped:", placeholders)
@@ -179,7 +188,10 @@ def events_to_occupancy(ev: pd.DataFrame, tz: str = config.TZ) -> pd.Series:
     t = pd.to_datetime(ev["collecteddate"], format="ISO8601", utc=True).dt.tz_convert(tz).dt.tz_localize(None)
     s = pd.Series(pd.to_numeric(ev["headcount"], errors="coerce").to_numpy(), index=t).dropna().sort_index()
     s = s[~s.index.duplicated(keep="last")]
+    # headcount is a state, not a rate: it stays true until the next event, so hold it forward
+    # (at minute resolution) before averaging; capped so a dead counter is not held forever
     s = s.resample("1min").last().ffill(limit=config.MAX_HOLD_MINUTES)
+    # closed/label="right": each interval is labelled by its END time, matching the sensor grid
     return s.resample(config.GRID, closed="right", label="right").mean().rename(config.TARGET)
 
 
@@ -201,6 +213,7 @@ def load_occupancy(occ_csv: str, floorspace: str = config.FLOORSPACE, tz: str = 
     Returns:
         Mean headcount per 15-minute interval (see :func:`events_to_occupancy`).
     """
+    # filter each 1M-row chunk immediately so the 9M-row file never sits in memory
     ev = pd.concat([c[c["floorspaceid"] == floorspace] for c in _read_occupancy_chunks(occ_csv)])
     occ = events_to_occupancy(ev, tz)
     if verbose:
@@ -238,6 +251,7 @@ def add_co2_change(env: pd.DataFrame) -> pd.DataFrame:
         Copy of ``env`` with the extra column (NaN for the first hour).
     """
     env = env.copy()
+    # diff(n) subtracts the value n rows EARLIER, so this looks backwards only (no leakage)
     env["co2_chg1h"] = env["co2"].diff(config.STEPS_PER_HOUR)
     return env
 
@@ -254,7 +268,9 @@ def build_modelling_table(env: pd.DataFrame, occ: pd.Series) -> pd.DataFrame:
         (0/1) and ``occupancy``. Rows missing ``occupancy`` or ``co2`` are dropped;
         other missing inputs are left for the model's imputer.
     """
+    # inner join: keep only intervals where both the sensor and the people counter have data
     df = env.join(occ, how="inner").dropna(subset=[config.TARGET, "co2"])
+    # fractional hour so 09:15 and 09:45 differ; dayofweek 5, 6 = Saturday, Sunday
     df["hour"] = df.index.hour + df.index.minute / 60
     df["weekend"] = (df.index.dayofweek >= 5).astype(int)
     return df

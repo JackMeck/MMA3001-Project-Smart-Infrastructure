@@ -32,7 +32,7 @@ def metrics(y, p) -> dict[str, float]:
         Dict with ``MAE`` and ``RMSE`` (people), ``R2`` (dimensionless) and ``bias``
         (mean of prediction minus observation, people; positive = over-prediction).
     """
-    p = np.clip(p, 0, None)
+    p = np.clip(p, 0, None)  # a negative headcount is impossible, so do not penalise a model for it
     return {"MAE": mean_absolute_error(y, p), "RMSE": mean_squared_error(y, p) ** 0.5,
             "R2": r2_score(y, p), "bias": float(np.mean(p - y))}
 
@@ -64,7 +64,8 @@ def chronological_split(df: pd.DataFrame, features: list[str] = config.FEATURES,
         :class:`Split` with ``X_tr, y_tr, X_te, y_te``.
     """
     X, y = df[features], df[target]
-    cut = int(train_frac * len(df))
+    cut = int(train_frac * len(df))  # chronological, never shuffled: shuffling would leak the future
+    # rows [cut-gap, cut) are discarded so the last training row is >= 2 h before the first test row
     return Split(X.iloc[:cut - gap], y.iloc[:cut - gap], X.iloc[cut:], y.iloc[cut:])
 
 
@@ -79,6 +80,7 @@ def cv_folds(X_tr: pd.DataFrame, n_splits: int = config.N_SPLITS, gap: int = con
     Returns:
         Iterator of ``(train_idx, val_idx)`` positional index arrays.
     """
+    # expanding window: fold k trains on everything before its validation block (minus the gap)
     return TimeSeriesSplit(n_splits=n_splits, gap=gap).split(X_tr)
 
 
@@ -111,5 +113,6 @@ def cv_table(models: dict[str, ModelFactory], X_tr: pd.DataFrame, y_tr: pd.Serie
     Returns:
         DataFrame indexed by model name (input order) with mean fold metrics.
     """
+    # average over folds so each model gets one comparable score per metric
     out = {name: cv_scores(make, X_tr, y_tr, n_splits, gap).mean() for name, make in models.items()}
     return pd.DataFrame(out).T

@@ -92,6 +92,8 @@ def svr_grid(X_tr, y_tr, cols: list[str] = config.LEAN, c_grid=SVR_C_GRID,
         ``(table, (C_best, eps_best))`` - MAE table (rows C, columns epsilon) and the
         minimising pair.
     """
+    # every (C, epsilon) pair is scored by cross-validation on the training period only,
+    # so the test set plays no part in choosing hyper-parameters
     table = pd.DataFrame({e: {C: cv_scores(svr_on(cols, C, e), X_tr, y_tr)["MAE"].mean() for C in c_grid}
                           for e in eps_grid})
     table.index.name, table.columns.name = "C", "epsilon"
@@ -115,6 +117,7 @@ def data_requirement(models: dict[str, ModelFactory], X_tr, y_tr,
         DataFrame indexed by "<fraction> (<rows> rows)" with validation and training MAE
         per model.
     """
+    # fixed validation block = last 20% of training, so every training size is scored on the same data
     v0 = int(0.8 * len(X_tr))
     X_val, y_val = X_tr.iloc[v0:], y_tr.iloc[v0:]
     X_pool, y_pool = X_tr.iloc[:v0 - gap], y_tr.iloc[:v0 - gap]
@@ -124,6 +127,7 @@ def data_requirement(models: dict[str, ModelFactory], X_tr, y_tr,
         row = {}
         for name, make in models.items():
             m = make().fit(X_pool.iloc[:n], y_pool.iloc[:n])
+            # train vs validation error: a widening gap would indicate over-fitting
             row[f"{name} val MAE"] = metrics(y_val, m.predict(X_val))["MAE"]
             row[f"{name} train MAE"] = metrics(y_pool.iloc[:n], m.predict(X_pool.iloc[:n]))["MAE"]
         curve[f"{frac:.0%} ({n} rows)"] = row
@@ -156,10 +160,11 @@ def time_models(models: dict[str, ModelFactory], X_tr, y_tr, X_te, repeats: int 
     """
     perf = []
     for name, make in models.items():
+        # best-of-n rather than mean: the minimum is the least disturbed by other processes
         fit_s = _best_time(lambda: make().fit(X_tr, y_tr), repeats)
         m = make().fit(X_tr, y_tr)
         pred_s = _best_time(lambda: m.predict(X_te), repeats)
-        tracemalloc.start()
+        tracemalloc.start()  # peak Python-level allocation during one fit
         make().fit(X_tr, y_tr)
         peak_mb = tracemalloc.get_traced_memory()[1] / 1e6
         tracemalloc.stop()
@@ -183,6 +188,7 @@ def final_test(models: dict[str, ModelFactory], X_tr, y_tr, X_te, y_te) -> tuple
     Returns:
         ``(table, predictions)`` - metrics per model and clipped predictions per model.
     """
+    # fits on training data only; the test block is used for scoring and nothing else
     preds, rows = {}, {}
     for name, make in models.items():
         preds[name] = np.clip(make().fit(X_tr, y_tr).predict(X_te), 0, None)
@@ -238,10 +244,11 @@ def floorspace_sensitivity(tables: dict[str, pd.DataFrame], models: dict[str, Mo
         Long DataFrame (floorspace, model, test mean occ, MAE, RMSE, R2, bias); a constant
         median predictor is added as a reference.
     """
-    models = dict(models)
+    models = dict(models)  # copy so the caller's dict is not modified
     models["Constant (median)"] = constant_model("median")
     rows = []
     for fs, d in tables.items():
+        # same dates as the main split, so results are comparable across floorspaces
         tr, te = d.loc[:train_end], d.loc[test_start:]
         if len(tr) < 500 or len(te) < 200:
             continue
