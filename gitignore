@@ -1,0 +1,26 @@
+# raw data (too large for GitHub; see README for how to obtain it)
+data/
+*.zip
+*.csv
+!tests/**/*.csv
+
+# generated results (recreate with: python -m smart_infrastructure --data-dir data --out results)
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# notebooks and editors
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
