@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMA3001 Smart Infrastructure Source Documentation</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #637084;
+      --accent: #2f6fed;
+      --accent-soft: #ebf2ff;
+      --border: #dfe6f1;
+      --code-bg: #0f172a;
+      --code-fg: #e2e8f0;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #1d4ed8);
+      color: white;
+      padding: 36px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .header-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2.2rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+      font-size: 1.02rem;
+    }
+
+    main {
+      margin-top: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 24px 24px 18px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    p, li {
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .module {
+      border: 1px solid var(--border);
+      background: #fbfdff;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .module h4 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .module p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-bottom: 10px;
+    }
+
+    .code {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      border-radius: 10px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 0.92rem;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f7f9fc;
+    }
+
+    @media (max-width: 700px) {
+      h1 { font-size: 1.8rem; }
+      .card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-wrap">
+      <h1>MMA3001 Smart Infrastructure</h1>
+      <p class="subtitle">Nowcasting room occupancy from environmental sensor data &mdash; source code documentation.</p>
+      <p class="subtitle" style="margin-top:14px"><a href="api/smart_infrastructure.html" style="color:#fff;text-decoration:underline">Open the full API reference (generated with pdoc) &rarr;</a></p>
+    </div>
+  </header>
+  <div class="container">
+    <main>
+      <section class="card">
+        <h2>Project overview</h2>
+        <p>One environmental sensor and one room. Sensor readings (CO2, temperature, humidity, VOC, PM2.5) are used to <em>nowcast</em> the current headcount. A time-of-week schedule baseline is compared with linear regression and support-vector regression (SVR) using time-ordered cross-validation and a single held-out test period.</p>
+        <p>The API reference is generated from the docstrings (Google style) by <code>pdoc</code>; each function documents its arguments, return values and the errors it raises.</p>
+      </section>
+
+      <section class="card">
+        <h2>Repository structure</h2>
+        <div class="code">MMA3001-Project-Smart-Infrastructure/
+├── README.md
+├── LICENSE
+├── pytest.ini
+├── Final_Project.ipynb        (analysis notebook)
+├── data/
+├── docs/
+│   ├── index.html             (this overview)
+│   └── api/                   (pdoc API reference)
+├── results/
+├── src/
+│   └── smart_infrastructure/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── data.py
+│       ├── models.py
+│       ├── evaluation.py
+│       ├── sensitivity.py
+│       ├── floorspace.py
+│       ├── plots.py
+│       └── pipeline.py
+└── tests/
+    ├── synth.py               (synthetic raw files in the real layouts)
+    ├── test_*.py
+    └── test_report.html       (pytest report)</div>
+      </section>
+
+      <section class="card">
+        <h2>Module-by-module documentation</h2>
+        <div class="grid">
+          <article class="module">
+            <span class="pill">Configuration</span>
+            <h4>src/smart_infrastructure/config.py</h4>
+            <p>Every setting in one dataclass: sensor and room ids, study window, grid, split sizes, model settings.</p>
+            <ul><li><code>Config</code> dataclass</li><li>Defaults reproduce the final notebook</li><li>Mutable defaults are per-instance</li></ul>
+            <a href="api/smart_infrastructure/config.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/config.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Data preparation</span>
+            <h4>src/smart_infrastructure/data.py</h4>
+            <p>Reads the raw JSON sensor file and occupancy event stream, cleans them and builds the modelling table.</p>
+            <ul><li><code>parse_env_json</code>, <code>drop_placeholders</code></li><li><code>to_grid</code> (causal 15-minute grid)</li><li><code>events_to_occupancy</code>, <code>build_table</code></li></ul>
+            <a href="api/smart_infrastructure/data.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/data.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Models</span>
+            <h4>src/smart_infrastructure/models.py</h4>
+            <p>The time-of-week baseline and factories for linear regression and SVR pipelines.</p>
+            <ul><li><code>ScheduleBaseline</code></li><li><code>linear_on</code>, <code>svr_on</code></li><li><code>candidate_models</code>, <code>final_models</code></li></ul>
+            <a href="api/smart_infrastructure/models.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/models.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Evaluation</span>
+            <h4>src/smart_infrastructure/evaluation.py</h4>
+            <p>Metrics, chronological split, time-ordered cross-validation, the single final test and computational cost.</p>
+            <ul><li><code>metrics</code> (MAE, RMSE, R², bias)</li><li><code>chronological_split</code> with gap</li><li><code>final_test</code>, <code>computational_cost</code></li></ul>
+            <a href="api/smart_infrastructure/evaluation.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/evaluation.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Sensitivity</span>
+            <h4>src/smart_infrastructure/sensitivity.py</h4>
+            <p>Feature ablation, leave-one-out, SVR settings sweep and training-data requirement (training period only).</p>
+            <ul><li><code>feature_ablation</code>, <code>leave_one_out</code></li><li><code>svr_grid</code></li><li><code>training_size_curve</code>, <code>data_requirement</code></li></ul>
+            <a href="api/smart_infrastructure/sensitivity.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/sensitivity.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Floorspace appendix</span>
+            <h4>src/smart_infrastructure/floorspace.py</h4>
+            <p>Repeats the analysis on every floorspace to show how sensitive results are to the sensor-room pairing.</p>
+            <ul><li><code>occupancy_all_floorspaces</code></li><li><code>floorspace_scan</code></li><li><code>floorspace_sensitivity</code></li></ul>
+            <a href="api/smart_infrastructure/floorspace.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/floorspace.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Plots</span>
+            <h4>src/smart_infrastructure/plots.py</h4>
+            <p>Test-set bar chart and first-week observed-vs-predicted plot.</p>
+            <ul><li><code>plot_test_results</code></li></ul>
+            <a href="api/smart_infrastructure/plots.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/plots.py">GitHub</a>
+          </article>
+          <article class="module">
+            <span class="pill">Pipeline</span>
+            <h4>src/smart_infrastructure/pipeline.py</h4>
+            <p>Runs the whole workflow and writes tables, plot and settings; also a command-line entry point.</p>
+            <ul><li><code>run_pipeline</code></li><li><code>save_results</code></li><li><code>python -m smart_infrastructure.pipeline</code></li></ul>
+            <a href="api/smart_infrastructure/pipeline.html">API reference</a> &middot; <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/src/smart_infrastructure/pipeline.py">GitHub</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Workflow</h2>
+        <table>
+          <thead><tr><th>Stage</th><th>Module</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>data.py</code></td><td>Load, clean and align sensor and occupancy data; build the modelling table.</td></tr>
+            <tr><td>2</td><td><code>evaluation.py</code>, <code>models.py</code></td><td>Chronological split (with gap); cross-validate the baseline, linear and SVR models.</td></tr>
+            <tr><td>3</td><td><code>sensitivity.py</code></td><td>Feature ablation, SVR settings and training-data requirement, using the training period only.</td></tr>
+            <tr><td>4</td><td><code>evaluation.py</code>, <code>plots.py</code></td><td>Cross-validate final models, time them, score the held-out test once, plot.</td></tr>
+            <tr><td>5</td><td><code>floorspace.py</code></td><td>Appendix: repeat on every floorspace (no re-tuning).</td></tr>
+            <tr><td>&ndash;</td><td><code>pipeline.py</code></td><td>Runs stages 1&ndash;5 and saves the results.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Typical usage</h2>
+        <div class="code">from smart_infrastructure import Config, run_pipeline
+
+cfg = Config()   # defaults: sensor 6012002000869, room 941f0352-..., Feb-Jun 2024
+result = run_pipeline(
+    cfg,
+    env_csv="data/5EnvSensor_MayToDec2024_180kRows.csv",
+    occ_csv="data/5occupancySensor_MayToDec2024_9MRows.csv",
+    out_dir="results",
+)
+print(result["test"])          # final held-out test metrics
+print(result["improvement"])   # MAE improvement over the schedule baseline
+
+# or from the command line:
+#   python -m smart_infrastructure.pipeline --data-dir data --out results</div>
+      </section>
+
+      <section class="card">
+        <h2>Running the tests</h2>
+        <div class="code">pip install pytest pytest-html pytest-cov
+pytest --html=tests/test_report.html --self-contained-html --cov=smart_infrastructure</div>
+        <p>The tests use small synthetic files in the same layouts as the real data, so no real data is needed.</p>
+      </section>
+
+      <section class="card">
+        <h2>Source references</h2>
+        <ul>
+          <li><a href="api/smart_infrastructure.html">API reference (pdoc)</a></li>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure">Repository</a></li>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/tree/main/src/smart_infrastructure">Package source</a></li>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/main/README.md">Project README</a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
