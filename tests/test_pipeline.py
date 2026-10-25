@@ -88,3 +88,8 @@ def test_command_line_entry_point(tmp_path, monkeypatch, light_cfg, capsys):
     main(["--data-dir", str(tmp_path), "--out", str(tmp_path / "o"), "--no-appendix"])
     assert (tmp_path / "o" / "test.csv").exists()
     assert "FINAL TEST" in capsys.readouterr().out
+
+
+def test_module_entry_point_exists():
+    import importlib.util
+    assert importlib.util.find_spec("smart_infrastructure.__main__") is not None
