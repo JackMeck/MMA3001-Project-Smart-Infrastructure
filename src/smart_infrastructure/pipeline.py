@@ -19,7 +19,7 @@ Usage from Python::
 
 Usage from the command line::
 
-    python -m smart_infrastructure.pipeline --data-dir data --out results
+    python -m smart_infrastructure --data-dir data --out results
 
 The held-out test period is scored exactly once, after all choices are made.
 """
@@ -170,7 +170,7 @@ def save_results(result: Dict, cfg: Config, out_dir: str, y_te: pd.Series) -> No
 
 
 def main(argv=None) -> None:
-    """Command-line entry point (``python -m smart_infrastructure.pipeline``)."""
+    """Command-line entry point (``python -m smart_infrastructure``)."""
     p = argparse.ArgumentParser(description="Room-occupancy nowcasting workflow.")
     p.add_argument("--data-dir", required=True,
                    help="Folder holding the two CSV files (or the .zip archives).")
