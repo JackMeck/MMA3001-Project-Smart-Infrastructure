@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MMA3001 Smart Infrastructure Source Documentation</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #637084;
+      --accent: #2f6fed;
+      --accent-soft: #ebf2ff;
+      --border: #dfe6f1;
+      --code-bg: #0f172a;
+      --code-fg: #e2e8f0;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #1d4ed8);
+      color: white;
+      padding: 36px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .header-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2.2rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+      font-size: 1.02rem;
+    }
+
+    main {
+      margin-top: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 24px 24px 18px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    p, li {
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .module {
+      border: 1px solid var(--border);
+      background: #fbfdff;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .module h4 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .module p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-bottom: 10px;
+    }
+
+    .code {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      border-radius: 10px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 0.92rem;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f7f9fc;
+    }
+
+    @media (max-width: 700px) {
+      h1 { font-size: 1.8rem; }
+      .card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-wrap">
+      <h1>MMA3001 Smart Infrastructure</h1>
+      <p class="subtitle">Source code documentation for the project structure and core workflow modules.</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <main>
+      <section class="card">
+        <h2>Project overview</h2>
+        <p>
+          This repository contains a Monash Smart Infrastructure analysis project focused on estimating room occupancy from environmental sensor data.
+          The code is organized around a reusable Python package under <code>src/smart_infrastructure/</code>, with the original notebook-based work retained as historical material.
+        </p>
+        <p>
+          The project includes configuration handling, data preparation, feature engineering, forecasting models, evaluation metrics, and an end-to-end pipeline runner.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Repository structure</h2>
+        <div class="code">MMA3001-Project-Smart-Infrastructure/
+├── README.md
+├── pyproject.toml
+├── Final_Project.ipynb
+├── MMA3001_Project.ipynb
+├── Project.ipynb
+├── archive/
+├── data/
+├── notebooks/
+├── results/
+├── src/
+│   └── smart_infrastructure/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── data.py
+│       ├── evaluation.py
+│       ├── pipeline.py
+└── tests/</div>
+      </section>
+
+      <section class="card">
+        <h2>Module-by-module documentation</h2>
+        <div class="grid">
+          <article class="module">
+            <span class="pill">Package entry</span>
+            <h4>src/smart_infrastructure/__init__.py</h4>
+            <p>Exports the public package interface and defines the top-level package version and import surface.</p>
+            <ul>
+              <li>Package initialization</li>
+              <li>Public exports</li>
+              <li>Import-friendly layout</li>
+            </ul>
+            <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/src/smart_infrastructure/__init__.py">View on GitHub</a>
+          </article>
+
+          <article class="module">
+            <span class="pill">Configuration</span>
+            <h4>src/smart_infrastructure/config.py</h4>
+            <p>Defines the core configuration dataclass used throughout the occupancy prediction workflow.</p>
+            <ul>
+              <li><code>Config</code> dataclass</li>
+              <li>Default data paths and feature settings</li>
+              <li>Environmental parameter mappings</li>
+              <li><code>monash_config(...)</code> helper</li>
+            </ul>
+            <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/src/smart_infrastructure/config.py">View on GitHub</a>
+          </article>
+
+          <article class="module">
+            <span class="pill">Data preparation</span>
+            <h4>src/smart_infrastructure/data.py</h4>
+            <p>Handles parsing, validation, cleaning, resampling, and dataset construction for environmental and occupancy data.</p>
+            <ul>
+              <li>JSON environment parsing</li>
+              <li>Placeholder/stuck reading detection</li>
+              <li>Occupancy event conversion</li>
+              <li>Dataset assembly and floor-space pairing</li>
+            </ul>
+            <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/src/smart_infrastructure/data.py">View on GitHub</a>
+          </article>
+
+          <article class="module">
+            <span class="pill">Evaluation</span>
+            <h4>src/smart_infrastructure/evaluation.py</h4>
+            <p>Contains the metrics, validation routines, sensitivity analyses, and performance measurements used to evaluate the model.</p>
+            <ul>
+              <li>Chronological train/test splits</li>
+              <li>Cross-validation utilities</li>
+              <li>Regression scoring metrics</li>
+              <li>Residual plots and feature ablation</li>
+            </ul>
+            <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/src/smart_infrastructure/evaluation.py">View on GitHub</a>
+          </article>
+
+          <article class="module">
+            <span class="pill">Pipeline</span>
+            <h4>src/smart_infrastructure/pipeline.py</h4>
+            <p>Runs the full workflow from cleaned data to model selection, final testing, and summary outputs.</p>
+            <ul>
+              <li>Model selection</li>
+              <li>Final test scoring</li>
+              <li>Audit/report generation</li>
+              <li>Monash dataset workflow</li>
+            </ul>
+            <a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/src/smart_infrastructure/pipeline.py">View on GitHub</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Core workflow summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Module</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><code>config.py</code></td>
+              <td>Defines project settings, feature groups, dataset paths, and model parameters.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><code>data.py</code></td>
+              <td>Loads the environmental and occupancy data, cleans invalid readings, and builds a modelling table.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><code>evaluation.py</code></td>
+              <td>Evaluates model performance with RMSE, MAE, R², residual diagnostics, and ablation studies.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><code>pipeline.py</code></td>
+              <td>Runs the complete end-to-end workflow and produces the final results and audit files.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Typical usage</h2>
+        <div class="code">from smart_infrastructure import Config, monash_config
+from smart_infrastructure.data import prepare_env, read_occupancy
+from smart_infrastructure.pipeline import run_monash
+
+cfg = monash_config(env_sensor_id="6012002000869")
+result = run_monash(cfg, out_dir="results/run1")
+print(result["selected_model"])
+print(result["final_test"])</div>
+      </section>
+
+      <section class="card">
+        <h2>Source references</h2>
+        <ul>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure">Repository</a></li>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/tree/restructure-project-layout/src/smart_infrastructure">Package source</a></li>
+          <li><a href="https://github.com/JackMeck/MMA3001-Project-Smart-Infrastructure/blob/restructure-project-layout/README.md">Project README</a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
