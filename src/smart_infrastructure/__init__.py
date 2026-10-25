@@ -1,9 +1,26 @@
-"""Smart Infrastructure project package.
+from __future__ import annotations
 
-This package provides the project logic in a reusable structure while keeping the
-original notebook-based work available in the repository root and archive folder.
-"""
+from .config import Config, monash_config
+from .data import build_dataset, build_features, build_modelling_table, occupancy_to_grid, prepared_env, prepare_env, pairing_scan, read_occupancy, to_events
+from .models import ScheduleBaseline, make_models, param_grids
+from .pipeline import run_from_clean, run_monash
 
-__all__ = ["project"]
+__version__ = "0.1.0"
 
-from . import project
+__all__ = [
+    "Config",
+    "monash_config",
+    "build_features",
+    "build_dataset",
+    "build_modelling_table",
+    "prepare_env",
+    "read_occupancy",
+    "to_events",
+    "occupancy_to_grid",
+    "pairing_scan",
+    "ScheduleBaseline",
+    "make_models",
+    "param_grids",
+    "run_from_clean",
+    "run_monash",
+]
